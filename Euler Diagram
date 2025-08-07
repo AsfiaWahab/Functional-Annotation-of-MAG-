@@ -1,0 +1,32 @@
+library(eulerr)
+library(extrafont)
+
+# Load fonts; this might be necessary depending on your setup and the specific fonts installed
+loadfonts(device = "win")
+
+# Assuming 'prokka', 'ghostkoala', and 'eggnog' are already cleaned and defined
+sets <- list(
+  PROKKA = unique(prokka),
+  GhostKOALA = unique(ghostkoala),
+  eggNOG = unique(eggnog)
+)
+
+# Fit the Euler diagram
+fit <- euler(sets)
+
+# Open a PNG device
+png("Euler_Diagram.png", width = 1200, height = 800, res = 300, type = "cairo")
+
+# Plot the diagram
+plot(fit, quantities = TRUE, main = "",
+     col = "black", fill = c("white", "skyblue4", "gray20"), lty = "solid",
+     legend = list(side = "bottom", nrow = 1, ncol = 3, fontfamily = "Calibri", face = "bold"), lwd = 1.6, alpha = 0.8)
+# Close the PNG device
+dev.off()
+
+# Assuming prokka, ghostkoala, and eggnog are vectors
+total_union = union(prokka, ghostkoala)
+total_union = union(total_union, eggnog)
+
+# To get the count
+total_count = length(total_union)
