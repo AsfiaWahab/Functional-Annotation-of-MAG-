@@ -1,0 +1,33 @@
+#Load the Libraries
+
+library(tidyverse)
+library(ggplot2)
+
+#Read the data
+t2 <- readxl::read_xlsx('enzymes1.xlsx')
+
+#Create a bar-chart using ggplot
+ggplot(data = t2, aes(x = tools, y = numbers, fill = categories)) +
+  geom_bar(stat = 'identity', position = 'dodge', color = 'black')+
+  scale_y_continuous(name = 'Number of Identified Enzymes', breaks = c(0, 10, 20, 30, 40, 50, 60)) +
+  scale_x_discrete(name = 'Tools') +
+  scale_fill_manual(name = 'Enzyme Types', values = c( 'white','black', 'grey')) +
+  theme_bw()+
+  theme(text=element_text(family = 'Arial', face = 'bold', size = 10))
+
+#Save the bar chart as a .png file
+ggsave('enzymes1.png', device = 'png', width = 6, height = 5)
+
+#Read the data
+mp <- readxl::read_xlsx('kEYM.xlsx')
+
+#Create a bar-chart using ggplot
+ggplot(data = mp, aes(x = Tools, y = Hits, fill = metabolism)) +
+  geom_bar(stat = 'identity', position = 'dodge', color = 'black')+
+  scale_y_continuous(name = 'Number of CDS') +
+  scale_x_discrete(name = 'Annotation Tools') +
+  scale_fill_manual(name = 'Types of Metabolism', values = c( 'white','black', 'grey')) +
+  theme_bw()+
+  theme(text=element_text(family = 'Arial', face = 'bold', size = 10))
+#Save the bar chart as a .png file
+ggsave('enzymes2.png', device = 'png', width = 6, height = 5)
