@@ -1,0 +1,63 @@
+import pandas as pd
+
+#Define COG category names
+cog_descriptions = {
+'J': 'Translation, ribosomal structure and biogenesis',
+    'A': 'RNA processing and modification',
+    'K': 'Transcription',
+    'L': 'Replication, recombination and repair',
+    'B': 'Chromatin structure and dynamics',
+    'D': 'Cell cycle control, cell division, chromosome partitioning',
+    'Y': 'Nuclear structure',
+    'V': 'Defense mechanisms',
+    'T': 'Signal transduction mechanisms',
+    'M': 'Cell wall/membrane/envelope biogenesis',
+    'N': 'Cell motility',
+    'Z': 'Cytoskeleton',
+    'W': 'Extracellular structures',
+    'U': 'Intracellular trafficking, secretion, and vesicular transport',
+    'O': 'Posttranslational modification, protein turnover, chaperones',
+    'C': 'Energy production and conversion',
+    'G': 'Carbohydrate transport and metabolism',
+    'E': 'Amino acid transport and metabolism',
+    'F': 'Nucleotide transport and metabolism',
+    'H': 'Coenzyme transport and metabolism',
+    'I': 'Lipid transport and metabolism',
+    'P': 'Inorganic ion transport and metabolism',
+    'Q': 'Secondary metabolites biosynthesis, transport and catabolism',
+    'R': 'General function prediction only',
+    'S': 'Function unknown'
+    '-': 'Not assigned'
+}
+
+# Load the data from the Excel output file from eggNOG
+data = pd.read_excel('out.emapper.annotations1.xlsx', engine='openpyxl')
+
+#Put the total number of CDS
+total_cds = 2621
+
+def prepare_cog_data(row):
+    if pd.isnull(row):
+        return []  # Return an empty list for NaN values
+    categories = row.split(',')
+    expanded_rows = []
+    for cat in categories:
+        if cat in cog_descriptions:
+            expanded_rows.append({'COG_category': cat, 'Description': cog_descriptions[cat]})
+        else:
+            for char in cat:
+                if char in cog_descriptions:
+                    expanded_rows.append({'COG_category': char, 'Description': cog_descriptions[char]})
+    return expanded_rows
+
+expanded_data = pd.DataFrame([item for sublist in data['COG_category'].apply(prepare_cog_data).tolist() for item in sublist])
+summary = expanded_data.groupby('COG_category').agg(Frequency=('COG_category', 'size'), Description=('Description', 'first')).reset_index()
+summary['Percentage'] = ((summary['Frequency'] / total_cds) * 100).round(2)
+summary['Order'] = summary['COG_category'].map(lambda x: list(cog_descriptions.keys()).index(x))
+summary.sort_values('Order', inplace=True)
+summary.drop(columns=['Order'], inplace=True)
+summary = summary[['COG_category', 'Frequency', 'Percentage', 'Description']]
+summary.to_excel('cog_category_summary_final.xlsx', index=False, engine='openpyxl')
+
+#Save File as a .py script and run it in python
+print("Summary table created and saved as 'cog_category_summary_final.xlsx'.")
